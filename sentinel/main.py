@@ -11,7 +11,7 @@ bbox = (3238005, 5039853, 3244050, 5045897)
 
 
 def main():
-    print(cloud_fetch(bbox))
+    # print(cloud_fetch(bbox))
     print(temperature_fetch(bbox))
 
 
