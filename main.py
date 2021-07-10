@@ -17,16 +17,18 @@ headers = {
 url = "https://services.sentinel-hub.com/api/v1/statistics"
 
 
-def main():
+def cloud_fetch():
     response = oauth.request("POST", url=url, headers=headers, json=gen_clouds(
         (
             3238005, 5039853, 3244050, 5045897
         )
     ))
+    stats = response.json()
+    print(stats)
 
-    sh_statistics = response.json()
 
-    print(sh_statistics)
+def main():
+    cloud_fetch()
 
 
 main()
