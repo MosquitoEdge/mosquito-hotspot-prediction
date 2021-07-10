@@ -1,13 +1,12 @@
 from datetime import datetime
 from typing import Dict, Tuple
-
+from auth import oauth, url, headers
 
 now = datetime.now().isoformat(timespec='seconds') + "Z"
 
-# Percentage of cloudy pixels for selected area of interest (default is EPSG:3857)
-
 
 def gen_clouds(bbox: Tuple[float], from_date: str = "2021-04-01T00:00:00Z", to_date: str = now) -> Dict:
+    """Percentage of cloudy pixels for selected area of interest (default is EPSG:3857)"""
     evalscript = """
             //VERSION=3
             function setup() {
@@ -66,3 +65,10 @@ def gen_clouds(bbox: Tuple[float], from_date: str = "2021-04-01T00:00:00Z", to_d
             "resy": 10
         },
     }
+
+
+def cloud_fetch(bbox: Tuple[float]) -> Dict:
+    response = oauth.request(
+        "POST", url=url, headers=headers, json=gen_clouds(bbox))
+    stats = response.json()
+    return stats

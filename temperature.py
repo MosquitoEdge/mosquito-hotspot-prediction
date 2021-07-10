@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Dict, Tuple
+from auth import oauth, url, headers
 
 now = datetime.now().isoformat(timespec='seconds') + "Z"
 
@@ -63,3 +64,10 @@ def gen_temp(bbox: Tuple[float], from_date: str = "2021-04-01T00:00:00Z", to_dat
             "resy": 10
         },
     }
+
+
+def temperature_fetch(bbox: Tuple[float]) -> Dict:
+    response = oauth.request(
+        "POST", url=url, headers=headers, json=gen_temp(bbox))
+    stats = response.json()
+    return stats
