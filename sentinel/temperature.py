@@ -65,8 +65,8 @@ function evaluatePixel(sample) {
     }
 
 
-def temperature_fetch(bbox: Tuple[float]) -> Dict:
+def temperature_fetch(bbox: Tuple[float], from_date: str = "2021-04-01T00:00:00Z", to_date: str = now) -> Dict:
     response = oauth.request(
-        "POST", url=url, headers=headers, json=gen_temp(bbox))
+        "POST", url=url, headers=headers, json=gen_temp(bbox, from_date, to_date))
     stats = response.json()
     return stats
