@@ -2,71 +2,78 @@ from datetime import datetime
 from typing import Dict, Tuple
 from auth import oauth, url, headers
 
-now = datetime.now().isoformat(timespec='seconds') + "Z"
+now = datetime.now().isoformat(timespec="seconds") + "Z"
 
 
-def gen_temp(bbox: Tuple[float], from_date: str = "2021-04-01T00:00:00Z", to_date: str = now) -> Dict:
+def gen_temp(
+    bbox: Tuple[float], from_date: str = "2021-04-01T00:00:00Z", to_date: str = now
+) -> Dict:
     evalscript = """
-    //VERSION=3
-  function setup() {
-  return {
-    input: [{
-      bands: ["S7", "S8", "S9", "F1", "F2"] 
-    }],
-    output: {
-      bands: 5,
-      sampleType: "UINT16"
-    }
-  }
-}
+                //VERSION=3
+                function setup() {
+                    return {
+                        input: [{
+                        bands: [
+                            "S9",
+                            "dataMask"
+                        ]
+                        }],
+                        output: [
+                        {
+                            id: "output_S9",
+                            bands: 1,
+                            sampleType: "FLOAT32"
+                        },
+                        {
+                            id: "dataMask",
+                            bands: 1
+                        }]
+                    }
+                }
+                function evaluatePixel(samples) {
+                    return {
+                        output_S9: [samples.S9],
+                        dataMask: [samples.dataMask]
+                    }
+                }
+                """
 
-function multiplyband(sample){
-  // Multiply by 100
-  return 100 * sample;
-}
-
-function evaluatePixel(sample) {
-  // Return the bands multiplied by 100 as integers to save processing units. 
-  // To obtain reflectance or BT values, simply divide the resulting pixel values by 100.
-  return [multiplyband(sample.S7), multiplyband(sample.S8), multiplyband(sample.S9), 
-          multiplyband(sample.F1), multiplyband(sample.F2)]
-}
-    """
     return {
         "input": {
             "bounds": {
                 "bbox": bbox,
-                "properties": {
-                    "crs": "http://www.opengis.net/def/crs/EPSG/0/3857"
-                }
+                "properties": {"crs": "http://www.opengis.net/def/crs/EPSG/0/3857"},
             },
             "data": [
                 {
                     "type": "sentinel-3-slstr",
-                    "dataFilter": {
-                        "mosaickingOrder": "leastRecent"
-                    },
-                    "orbitDirection": "DESCENDING"
+                    "dataFilter": {"mosaickingOrder": "leastRecent"},
                 }
-            ]
+            ],
         },
         "aggregation": {
-            "timeRange": {
-                "from": from_date,
-                "to": to_date
-            },
-            "aggregationInterval": {
-                "of": "P1D"
-            },
+            "timeRange": {"from": from_date, "to": to_date},
+            "aggregationInterval": {"of": "P1D"},
             "evalscript": evalscript,
-            "resx": 500,
-            "resy": 500
+            "resx": 10,
+            "resy": 10,
+        },
+        "calculations": {
+            "default": {
+                "histograms": {
+                    "default": {"nBins": 5, "lowEdge": 0.0, "highEdge": 0.3}
+                },
+                "statistics": {"default": {"percentiles": {"k": [33, 50, 75, 90]}}},
+            }
         },
     }
 
 
-def temperature_fetch(bbox: Tuple[float], from_date: str = "2021-04-01T00:00:00Z", to_date: str = now) -> Dict:
+def temperature_fetch(
+    bbox: Tuple[float], from_date: str = "2021-04-01T00:00:00Z", to_date: str = now
+) -> Dict:
     response = oauth.request(
-        "POST", url=url, headers=headers, json=gen_temp(bbox, from_date, to_date))
+        "POST", url=url, headers=headers, json=gen_temp(bbox, from_date, to_date)
+    )
     stats = response.json()
     return stats
