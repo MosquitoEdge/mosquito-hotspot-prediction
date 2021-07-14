@@ -14,13 +14,13 @@ def gen_temp(
                     return {
                         input: [{
                         bands: [
-                            "S9",
+                            "B10",
                             "dataMask"
                         ]
                         }],
                         output: [
                         {
-                            id: "output_S9",
+                            id: "output_B10",
                             bands: 1,
                             sampleType: "FLOAT32"
                         },
@@ -32,7 +32,7 @@ def gen_temp(
                 }
                 function evaluatePixel(samples) {
                     return {
-                        output_S9: [samples.S9],
+                        output_B10: [samples.B10],
                         dataMask: [samples.dataMask]
                     }
                 }
@@ -42,11 +42,11 @@ def gen_temp(
         "input": {
             "bounds": {
                 "bbox": bbox,
-                "properties": {"crs": "http://www.opengis.net/def/crs/EPSG/0/3857"},
+                "properties": {"crs": "http://www.opengis.net/def/crs/EPSG/0/4326"},
             },
             "data": [
                 {
-                    "type": "sentinel-3-slstr",
+                    "type": "landsat-ot-l2",
                     "dataFilter": {"mosaickingOrder": "leastRecent"},
                 }
             ],
@@ -58,14 +58,14 @@ def gen_temp(
             "resx": 10,
             "resy": 10,
         },
-        "calculations": {
-            "default": {
-                "histograms": {
-                    "default": {"nBins": 5, "lowEdge": 0.0, "highEdge": 0.3}
-                },
-                "statistics": {"default": {"percentiles": {"k": [33, 50, 75, 90]}}},
-            }
-        },
+        # "calculations": {
+        #     "default": {
+        #         "histograms": {
+        #             "default": {"nBins": 5, "lowEdge": 0.0, "highEdge": 0.3}
+        #         },
+        #         "statistics": {"default": {"percentiles": {"k": [33, 50, 75, 90]}}},
+        #     }
+        # },
     }
 
 
