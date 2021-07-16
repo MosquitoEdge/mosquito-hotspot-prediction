@@ -42,7 +42,7 @@ def gen_temp(
         "input": {
             "bounds": {
                 "bbox": bbox,
-                "properties": {"crs": "http://www.opengis.net/def/crs/EPSG/0/4326"},
+                "properties": {"crs": "http://www.opengis.net/def/crs/EPSG/0/3857"},
             },
             "data": [
                 {

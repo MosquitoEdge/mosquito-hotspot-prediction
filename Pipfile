@@ -8,6 +8,7 @@ requests = "*"
 requests-oauthlib = "*"
 oauthlib = "*"
 pandas = "*"
+arrow = "*"
 
 [dev-packages]
 

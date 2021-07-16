@@ -5,7 +5,7 @@ from auth import oauth, url, headers
 now = datetime.now().isoformat(timespec="seconds") + "Z"
 
 
-def gen_water(
+def gen_ndvi(
     bbox: Tuple[float], from_date: str = "2021-04-01T00:00:00Z", to_date: str = now
 ) -> Dict:
     evalscript = """
@@ -14,15 +14,16 @@ def gen_water(
                     return {
                         input: [{
                         bands: [
-                            "B09",
+                            "B04",
+                            "B08",
+                            "SCL",
                             "dataMask"
                         ]
                         }],
                         output: [
                         {
-                            id: "output_B09",
-                            bands: 1,
-                            sampleType: "FLOAT32"
+                            id: "data",
+                            bands: 1
                         },
                         {
                             id: "dataMask",
@@ -30,10 +31,24 @@ def gen_water(
                         }]
                     }
                 }
+
                 function evaluatePixel(samples) {
+                    let ndvi = (samples.B08 - samples.B04)/(samples.B08 + samples.B04)
+                    
+                    var validNDVIMask = 1
+                    if (samples.B08 + samples.B04 == 0 ){
+                        validNDVIMask = 0
+                    }
+                    
+                    var noWaterMask = 1
+                    if (samples.SCL == 6 ){
+                        noWaterMask = 0
+                    }
+
                     return {
-                        output_B09: [samples.B09],
-                        dataMask: [samples.dataMask]
+                        data: [ndvi],
+                        // Exclude nodata pixels, pixels where ndvi is not defined and water pixels from statistics:
+                        dataMask: [samples.dataMask * validNDVIMask * noWaterMask]
                     }
                 }
                 """
@@ -45,35 +60,24 @@ def gen_water(
                 "properties": {"crs": "http://www.opengis.net/def/crs/EPSG/0/3857"},
             },
             "data": [
-                {
-                    "type": "sentinel-2-l2a",
-                    "dataFilter": {"mosaickingOrder": "leastRecent"},
-                }
+                {"type": "sentinel-2-l2a", "dataFilter": {"mosaickingOrder": "leastCC"}}
             ],
         },
         "aggregation": {
-            "timeRange": {"from": from_date, "to": to_date},
-            "aggregationInterval": {"of": "P1D"},
+            "timeRange": {"from": "2020-01-01T00:00:00Z", "to": "2020-12-31T00:00:00Z"},
+            "aggregationInterval": {"of": "P30D"},
             "evalscript": evalscript,
             "resx": 10,
             "resy": 10,
         },
-        "calculations": {
-            "default": {
-                "histograms": {
-                    "default": {"nBins": 5, "lowEdge": 0.0, "highEdge": 0.3}
-                },
-                "statistics": {"default": {"percentiles": {"k": [33, 50, 75, 90]}}},
-            }
-        },
     }
 
 
-def water_fetch(
+def ndvi_fetch(
     bbox: Tuple[float], from_date: str = "2021-04-01T00:00:00Z", to_date: str = now
 ) -> Dict:
     response = oauth.request(
-        "POST", url=url, headers=headers, json=gen_water(bbox, from_date, to_date)
+        "POST", url=url, headers=headers, json=gen_ndvi(bbox, from_date, to_date)
     )
     stats = response.json()
     return stats
