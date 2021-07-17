@@ -9,6 +9,7 @@ requests-oauthlib = "*"
 oauthlib = "*"
 pandas = "*"
 arrow = "*"
+tqdm = "*"
 
 [dev-packages]
 
