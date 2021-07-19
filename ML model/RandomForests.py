@@ -32,7 +32,6 @@ def getStormGlass (longitude, latitude, date):
                         "humidity",
                         "precipitation",
                         "pressure",
-                        "iceCover",
                     ]
                 ),
                 "start": start,
