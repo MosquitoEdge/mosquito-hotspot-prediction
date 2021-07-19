@@ -110,7 +110,7 @@ def getStormGlass (longitude, latitude, date):
     main()
 
     return arr
-def RandomForests (array):
+def RandomForests (myarray):
     from sqlalchemy import create_engine
     import pymysql
     import pandas as pd
@@ -162,15 +162,15 @@ def RandomForests (array):
     classifier.fit(X_train, y_train)
 
     if counter == 1:
-        pred = [[array[0]]]
+        pred = [[myarray[0]]]
     if counter == 2:
-        pred = [[array[0], array[1]]]
+        pred = [[myarray[0], myarray[1]]]
     if counter == 3:
-        pred = [[array[0], array[1], array[2]]]
+        pred = [[myarray[0], myarray[1], myarray[2]]]
     if counter == 4:
-        pred = [[array[0], array[1], array[2], array[3]]]
+        pred = [[myarray[0], myarray[1], myarray[2], myarray[3]]]
     if counter == 5:
-        pred = [[array[0], array[1], array[2], array[3], array[4]]]
+        pred = [[myarray[0], myarray[1], myarray[2], myarray[3], myarray[4]]]
 
     finalpred = classifier.predict(pred)
     thepred = classifier.predict_proba(pred)
