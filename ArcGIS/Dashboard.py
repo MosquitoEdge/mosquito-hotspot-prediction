@@ -341,7 +341,7 @@ while True:
     longitude=random.randint(-66,124) #Change this
     latitude=random.randint(26,49) #Change this
 
-    date=arrow.get("2020-07-21T13:05Z")
+    date=arrow.get("2021-07-21T13:05Z")
 
     arr=getStormGlass(longitude, latitude, date)
 
