@@ -53,7 +53,7 @@ class MyPerson:
         return self.done
 
     def going_UP(self, mid_start, mid_end):
-        if len(self.tracks) >= 15: #change
+        if len(self.tracks) >= 5: #change
             if self.state == '0':
                 if self.tracks[-1][1] < mid_end and self.tracks[-2][1] >= mid_end:  # cruzo la linea
                     state = '1'
@@ -65,7 +65,7 @@ class MyPerson:
             return False
 
     def going_DOWN(self, mid_start, mid_end):
-        if len(self.tracks) >= 15: #change
+        if len(self.tracks) >= 5: #change
             if self.state == '0':
                 if self.tracks[-1][1] > mid_start and self.tracks[-2][1] <= mid_start:  # cruzo la linea
                     state = '1'
