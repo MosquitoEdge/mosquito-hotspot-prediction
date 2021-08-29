@@ -10,6 +10,48 @@ import time
 import random
 import string
 import pyautogui
+import mysql.connector
+
+def convertToBinaryData(filename):
+    # Convert digital data to binary format
+    with open(filename, 'rb') as file:
+        binaryData = file.read()
+    return binaryData
+
+
+def insertBLOB(name, photo):
+    print("Inserting BLOB into python_employee table")
+    try:
+        connection = mysql.connector.connect(host="fyidev.cj4ghwejxvaa.us-east-2.rds.amazonaws.com",
+                                             user="admin",
+                                             password="findyourinvasive",
+                                             database="MosquitoImages")
+
+        cursor = connection.cursor()
+        sql = "CREATE TABLE IF NOT EXISTS test3 (name VARCHAR(255), photo LONGBLOB NOT NULL)"
+
+        cursor.execute(sql)
+        sql_insert_blob_query = """ INSERT INTO test3 (name, photo) VALUES (%s,%s) """
+
+        pic = convertToBinaryData(photo)
+
+
+        # Convert data into tuple format
+        insert_blob_tuple = (name, pic)
+        result = cursor.execute(sql_insert_blob_query, insert_blob_tuple)
+        connection.commit()
+        print("Image and file inserted successfully as a BLOB ", result)
+
+    except mysql.connector.Error as error:
+        print("Failed inserting BLOB data into MySQL table {}".format(error))
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
+
+
 
 counter=0
 
@@ -23,7 +65,8 @@ cnt_up = 0
 cnt_down = 0
 
 
-cap = cv.VideoCapture(0)
+cap = cv.VideoCapture("LarvaeVid.mp4")
+#cap = cv.VideoCapture(0)
 
 for i in range(19):
     print(i, cap.get(i))
@@ -137,14 +180,14 @@ while (cap.isOpened()):
                         i.updateCoords(cx, cy)  # actualiza coordenadas en el objeto and resets age
 
 
-
-
                         if i.going_UP(line_down, line_up) == True:
                             cnt_up += 1;
                             print("ID:", i.getId(), 'crossed going up at', time.strftime("%c"))
                             log.write("ID: " + str(i.getId()) + ' crossed going up at ' + time.strftime("%c") + '\n')
 
+
                             counter+=1
+
                             print ("Counter: "+str (counter))
 
 
@@ -157,7 +200,9 @@ while (cap.isOpened()):
                             print("ID:", i.getId(), 'crossed going down at', time.strftime("%c"))
                             log.write("ID: " + str(i.getId()) + ' crossed going down at ' + time.strftime("%c") + '\n')
 
-                            counter+=1
+
+                            counter += 1
+
                             print("Counter: " + str(counter))
 
 
@@ -185,11 +230,14 @@ while (cap.isOpened()):
             cv.circle(frame, (cx, cy), 5, (0, 0, 255), -1)
             img = cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-            if counter>10:
+            if counter>2:
                 print ("Taking Screenshot...")
-                name=time.strftime("%c").replace (":", "_").replace (" ","_")+".jpg"
-                cv.imwrite(name, img)
+                name=time.strftime("%c").replace (":", "_").replace (" ","_")
+                file=name+".jpg"
+                cv.imwrite(file, img)
                 counter=0
+                insertBLOB(name, file)
+                print ("Number of larvae: "+str (len (persons)))
 
 
             # cv.drawContours(frame, cnt, -1, (0,255,0), 3)
@@ -239,3 +287,6 @@ log.flush()
 log.close()
 cap.release()
 cv.destroyAllWindows()
+
+#1. Validate
+#2. Add presence or absence point to training database in MySQL
