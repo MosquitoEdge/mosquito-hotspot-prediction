@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+
+# launch this script whenever a new point is added to the database
+
+sed -i '$d' "index.js"
+
+python3 ./update.py
